@@ -6,6 +6,7 @@ using Dates
 using GZip
 using HTTP
 using JSON
+using ArgParse
 import Base
 
 
@@ -175,25 +176,35 @@ function find_sensor_id(filename::String)
     return ""
 end
 
+function parse_args()
+    s = ArgParseSettings()
 
-# 主程式
-function main(args)
-    # 檢查是否提供了足夠的參數
-    if length(args) < 2
-        println("請提供 file_id 和 zipfilename")
-        println(""" ussage: julia main.jl "google-drive-file-id" "test_filename_from_google_drive.zip" """)
-        exit(1)
+    @add_arg_table! s begin
+        "--fileid"
+            required = true
+            help = "fileid is a required argument."
+        "--zipfilename"
+            required = true
+            help = "zipfilename is also a required argument."
     end
 
+    return ArgParse.parse_args(s)
+end
+
+
+# 主程式
+function main()
+
+    args = parse_args()
+
     # 分別將參數指定給對應的變數
-    file_id = args[1]
-    zipfilename = args[2]
+    file_id = args["fileid"]
+    zipfilename = args["zipfilename"]
     foldername = replace(zipfilename, ".zip" => "")
 
     # init settings
     println("file_id: $file_id")
     println("zipfilename: $zipfilename")
-
 
     #000 Download zip file
     download_zip_file(file_id, zipfilename)   
@@ -255,7 +266,7 @@ end
 
 start_time = now()  # 記錄程式開始時間
 # 呼叫 main 函數並將 ARGS 作為參數傳遞
-main(ARGS)
+main()
 end_time = now()  # 記錄程式結束時間
 
 elapsed_time = end_time - start_time  # 計算主程式執行時間
