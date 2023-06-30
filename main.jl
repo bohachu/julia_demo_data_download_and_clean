@@ -155,6 +155,8 @@ function save_device_dataframes(df, device_ids, dates, outputdir="results")
                     zipcsv(filename)    
                 end
 
+                println(" Save zip file done:", zip_filename)
+
             end
         end
     end
@@ -205,25 +207,40 @@ function main()
     # init settings
     println("file_id: $file_id")
     println("zipfilename: $zipfilename")
+    
 
+
+    ## Timing start
+    start_time_1 = now()  # 記錄程式開始時間
+        
     #000 Download zip file
     download_zip_file(file_id, zipfilename)   
-    print("[info] download_zip_file=$zipfilename.....Done!")
+    println("[info] download_zip_file=$zipfilename.....Done!")
 
-    ##Base.exit() # debug
+    ## Timing end
+    end_time_1 = now()  # 記錄程式結束時間    
+    elapsed_time_1 = end_time_1 - start_time_1  # 計算主程式執行時間
+    elapsed_time_1 = Dates.value(elapsed_time_1) / (1000 * 60)
+    elapsed_time_1 = round(elapsed_time_1, digits=4)
+    println("Executing Time (mins):", elapsed_time_1)
 
     #001 unzip
     println("[info] 001 unzip file...")
     unzip(zipfilename, foldername)
     println("[info] 002 unzip file... done!")
 
-
+    ##Base.exit() # debug
+    
 
     #002
     flag_loop = 1
     for csv_file in readdir(foldername)
         if endswith(csv_file, ".csv")
             
+            ## Timing start 2
+            start_time_2 = now()  # 記錄程式開始時間
+
+
             # skip this system file..
             if csv_file == "empty_data_log.csv" 
                 continue
@@ -255,12 +272,23 @@ function main()
             device_ids, dates = get_unique_values(df)
 
             #006 save all device + date to csv files
-            println("006 start save_device_dataframes")
+            println("004 start save_device_dataframes")
 
             save_device_dataframes(df, device_ids, dates)
+            println("005 end save_device_dataframes done!")
+
+
+            ## Timing end level 2
+            end_time_2 = now()  # 記錄程式結束時間    
+            elapsed_time_2 = end_time_2 - start_time_2  # 計算主程式執行時間
+            elapsed_time_2 = Dates.value(elapsed_time_2) / (1000 * 60)
+            elapsed_time_2 = round(elapsed_time_2, digits=4)
+            println("Executing Time (mins):", elapsed_time_2)
 
         end
     end
+
+
 end
 
 
@@ -270,5 +298,7 @@ main()
 end_time = now()  # 記錄程式結束時間
 
 elapsed_time = end_time - start_time  # 計算主程式執行時間
-println("Executing Time:", elapsed_time)
+elapsed_time = Dates.value(elapsed_time) / (1000 * 60)
+elapsed_time = round(elapsed_time, digits=4)
+println("All Executing Time (mins):", elapsed_time)
 
